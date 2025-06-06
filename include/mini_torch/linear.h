@@ -8,6 +8,8 @@ public:
     Linear(size_t in, size_t out);
     /// @brief Forward pass
     Tensor operator()(const Tensor &input) const;
+    /// @brief Gradient descent update using output gradient
+    void step(const Tensor &input, const Tensor &grad_output, float lr);
 
 private:
     Tensor m_weight; ///< weight matrix
