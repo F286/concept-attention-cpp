@@ -28,7 +28,9 @@ add_executable(all_tests
     tests/attention_tests.cpp
     tests/model_tests.cpp
     tests/train_run_tests.cpp
+    tests/pytorch_parity_tests.cpp
 )
+target_include_directories(all_tests PRIVATE tests)
 target_link_libraries(all_tests PRIVATE mini_torch)
 add_test(NAME all_tests COMMAND all_tests "~[TRAIN]")
 
