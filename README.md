@@ -8,11 +8,16 @@ The project aims to compare training behaviour of a baseline transformer against
 
 ## Training Example
 
-The `train_models` executable runs a five-epoch mean squared error training loop
-over a single random sample and prints the loss for both the baseline and genesis models.
-Build with CMake and run:
+An optional training test runs a five-epoch mean squared error loop over a single random sample and prints the loss for both the baseline and genesis models. The test is tagged `[TRAIN]` so it only runs when selected.
+Build the project then run regular tests with
 
 ```sh
 cmake -S . -B build && cmake --build build
-./build/train_models
+ctest -LE TRAIN
+```
+
+Invoke the training test separately with
+
+```sh
+ctest -L TRAIN
 ```
