@@ -10,6 +10,8 @@
  */
 class Tensor {
 public:
+    /// @brief Default construct empty tensor
+    Tensor() = default;
     /// @brief Construct tensor with shape and initial value
     Tensor(std::vector<size_t> shape, float value = 0.0f);
     /// @brief Access element by flat index
