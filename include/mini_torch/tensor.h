@@ -3,6 +3,7 @@
 #include <cassert>
 #include <concepts>
 #include <experimental/simd>
+#include <memory>
 
 using floatv = std::experimental::native_simd<float>;
 
@@ -33,8 +34,12 @@ class Tensor {
 public:
     /// @brief Default construct empty tensor
     Tensor() = default;
+    /// @brief Copy construct tensor
+    Tensor(const Tensor& other);
+    /// @brief Copy assign tensor
+    Tensor& operator=(const Tensor& other);
     /// @brief Construct tensor with shape and initial value
-    Tensor(std::vector<size_t> shape, float value = 0.0f);
+    Tensor(std::vector<size_t> shape, float value = 0.0f, bool requires_grad = false);
     /// @brief Access element by flat index
     ScalarRef operator[](size_t idx);
     /// @brief Const access by flat index
@@ -63,19 +68,39 @@ public:
     static Tensor sub(const Tensor &a, const Tensor &b);
     /// @brief Elementwise multiplication
     static Tensor mul(const Tensor &a, const Tensor &b);
+    /// @brief Matrix multiplication
+    Tensor matmul(const Tensor &other) const;
+    /// @brief Elementwise addition operator
+    Tensor operator+(const Tensor &other) const;
+    /// @brief Elementwise subtraction operator
+    Tensor operator-(const Tensor &other) const;
+    /// @brief Elementwise multiplication operator
+    Tensor operator*(const Tensor &other) const;
     /// @brief Transpose 2D tensor
     static Tensor transpose(const Tensor &t);
     /// @brief Row-wise softmax for a 2D tensor
     static Tensor softmax(const Tensor &t);
-    /// @brief Apply ReLU
-    void relu();
+    /// @brief Out of place ReLU
+    Tensor relu() const;
+    /// @brief In place ReLU
+    void relu_();
     /// @brief Fill tensor with value
     void fill(float v);
+    /// @brief Access gradient tensor
+    Tensor &grad();
+    /// @brief Const access gradient tensor
+    const Tensor &grad() const;
+    /// @brief Whether tensor requires gradients
+    bool requires_grad() const;
+    /// @brief Zero stored gradients
+    void zero_grad();
 
 private:
     std::vector<size_t> m_shape; ///< tensor dimensions
     size_t m_size{};             ///< scalar element count
     std::vector<floatv> m_data;  ///< SIMD element storage
+    mutable std::unique_ptr<Tensor> m_grad; ///< stored gradient
+    bool m_requires_grad{};      ///< autograd flag
 };
 
 /// @brief Concept requirement similar to std::ranges::range

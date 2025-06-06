@@ -1,9 +1,10 @@
 #pragma once
 #include "linear.h"
 #include "attention.h"
+#include "module.h"
 
 /// @brief Minimal transformer-like model with standard attention
-class Model {
+class Model : public Module {
 public:
     /// @brief Construct model with embedding dimension
     Model(size_t dim);
@@ -11,6 +12,8 @@ public:
     Tensor operator()(const Tensor &input) const;
     /// @brief Train output layer on one sample
     void train_step(const Tensor &input, const Tensor &target, float lr);
+    /// @brief List of trainable parameters
+    std::vector<Tensor*> parameters() override;
 
 private:
     Linear m_proj_q; ///< query projection
@@ -20,7 +23,7 @@ private:
 };
 
 /// @brief Model variant using genesis attention
-class GenesisModel {
+class GenesisModel : public Module {
 public:
     /// @brief Construct model with embedding dimension
     GenesisModel(size_t dim);
@@ -28,6 +31,8 @@ public:
     Tensor operator()(const Tensor &input) const;
     /// @brief Train output layer on one sample
     void train_step(const Tensor &input, const Tensor &target, float lr);
+    /// @brief List of trainable parameters
+    std::vector<Tensor*> parameters() override;
 
 private:
     Linear m_proj_q;         ///< query projection

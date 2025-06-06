@@ -2,12 +2,36 @@
 #include <numeric>
 #include <algorithm>
 #include <cmath>
+#include <memory>
 
-Tensor::Tensor(std::vector<size_t> shape, float value)
-    : m_shape(std::move(shape)) {
+Tensor::Tensor(std::vector<size_t> shape, float value, bool requires_grad)
+    : m_shape(std::move(shape)), m_requires_grad(requires_grad) {
     m_size = std::accumulate(m_shape.begin(), m_shape.end(), 1u, std::multiplies<>());
     size_t chunks = (m_size + floatv::size() - 1) / floatv::size();
     m_data.assign(chunks, floatv(value));
+    if (m_requires_grad) {
+        m_grad = std::make_unique<Tensor>(m_shape);
+    }
+}
+
+Tensor::Tensor(const Tensor& other)
+    : m_shape(other.m_shape), m_size(other.m_size), m_data(other.m_data),
+      m_requires_grad(other.m_requires_grad) {
+    if (other.m_grad)
+        m_grad = std::make_unique<Tensor>(*other.m_grad);
+}
+
+Tensor& Tensor::operator=(const Tensor& other) {
+    if (this == &other) return *this;
+    m_shape = other.m_shape;
+    m_size = other.m_size;
+    m_data = other.m_data;
+    m_requires_grad = other.m_requires_grad;
+    if (other.m_grad)
+        m_grad = std::make_unique<Tensor>(*other.m_grad);
+    else
+        m_grad.reset();
+    return *this;
 }
 
 ScalarRef Tensor::operator[](size_t idx) {
@@ -80,7 +104,29 @@ Tensor Tensor::mul(const Tensor &a, const Tensor &b) {
     return out;
 }
 
-void Tensor::relu() {
+Tensor Tensor::matmul(const Tensor &other) const {
+    return Tensor::matmul(*this, other);
+}
+
+Tensor Tensor::operator+(const Tensor &other) const {
+    return Tensor::add(*this, other);
+}
+
+Tensor Tensor::operator-(const Tensor &other) const {
+    return Tensor::sub(*this, other);
+}
+
+Tensor Tensor::operator*(const Tensor &other) const {
+    return Tensor::mul(*this, other);
+}
+
+Tensor Tensor::relu() const {
+    Tensor out = *this;
+    out.relu_();
+    return out;
+}
+
+void Tensor::relu_() {
     const floatv zero(0.0f);
     for (auto &chunk : m_data) {
         std::experimental::where(chunk < zero, chunk) = zero;
@@ -120,4 +166,25 @@ Tensor Tensor::softmax(const Tensor &t) {
             out[r * cols + c] /= sum;
     }
     return out;
+}
+
+Tensor &Tensor::grad() {
+    if (!m_grad)
+        m_grad = std::make_unique<Tensor>(m_shape);
+    return *m_grad;
+}
+
+const Tensor &Tensor::grad() const {
+    if (!m_grad)
+        m_grad = std::make_unique<Tensor>(m_shape);
+    return *m_grad;
+}
+
+bool Tensor::requires_grad() const {
+    return m_requires_grad;
+}
+
+void Tensor::zero_grad() {
+    if (m_grad)
+        m_grad->fill(0.0f);
 }

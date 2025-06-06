@@ -1,5 +1,6 @@
 #pragma once
 #include "tensor.h"
+#include "module.h"
 #include <vector>
 #include <random>
 
@@ -11,12 +12,14 @@ public:
 };
 
 /// @brief Experimental genesis attention implementation
-class GenesisAttention {
+class GenesisAttention : public Module {
 public:
     /// @brief Construct with projection counts and dimension
     GenesisAttention(size_t concepts, size_t dim);
     /// @brief Apply attention
     Tensor operator()(const Tensor &q, const Tensor &k, const Tensor &v) const;
+    /// @brief List of trainable parameters
+    std::vector<Tensor*> parameters() override;
 
 private:
     mutable bool m_initialized;   ///< lazy weight initialization flag
