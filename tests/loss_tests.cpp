@@ -18,3 +18,21 @@ TEST_CASE("mse loss") {
 }
 
 static_assert(std::is_copy_constructible_v<MSELoss>);
+
+/// @brief verify cross entropy loss forward and backward
+TEST_CASE("cross entropy loss") {
+    Tensor logits({2,3});
+    logits[0] = 1.0f; logits[1] = 2.0f; logits[2] = 3.0f;
+    logits[3] = 1.0f; logits[4] = 2.0f; logits[5] = 3.0f;
+    std::vector<size_t> target = {2, 0};
+    CrossEntropyLoss loss;
+    float v = loss(logits, target);
+    CHECK(v > 0.0f);
+    auto grad = loss.backward(logits, target);
+    CHECK(grad.shape() == logits.shape());
+    // grad rows should sum to zero
+    CHECK(grad.at(0,0) + grad.at(0,1) + grad.at(0,2) == doctest::Approx(0.0f));
+    CHECK(grad.at(1,0) + grad.at(1,1) + grad.at(1,2) == doctest::Approx(0.0f));
+}
+
+static_assert(std::is_copy_constructible_v<CrossEntropyLoss>);
