@@ -1,5 +1,6 @@
 #include <doctest/doctest.h>
 #include "mini_torch/model.h"
+#include "mini_torch/loss.h"
 #include <random>
 #include <cmath>
 
@@ -37,12 +38,30 @@ TEST_CASE("training loop") {
         genesis.train_step(input, target, lr);
         auto out_b = baseline(input);
         auto out_g = genesis(input);
-        loss_b=0.0f; loss_g=0.0f;
-        for(size_t i=0;i<out_b.size();++i){
-            loss_b += 0.5f*(out_b[i]-target[i])*(out_b[i]-target[i]);
-            loss_g += 0.5f*(out_g[i]-target[i])*(out_g[i]-target[i]);
-        }
+        MSELoss loss;
+        loss_b = loss(out_b, target);
+        loss_g = loss(out_g, target);
     }
     CHECK(std::isfinite(loss_b));
     CHECK(std::isfinite(loss_g));
+}
+
+/// @brief Single train step lowers loss
+TEST_CASE("model step lowers loss") {
+    Tensor input({1, 2});
+    input[0] = 0.5f;
+    input[1] = -0.5f;
+    Tensor target({1, 2});
+    target.fill(0.0f);
+
+    Model model(2);
+    auto out0 = model(input);
+    MSELoss loss;
+    float loss0 = loss(out0, target);
+
+    model.train_step(input, target, 0.1f);
+    auto out1 = model(input);
+    float loss1 = loss(out1, target);
+
+    CHECK(loss1 < loss0);
 }

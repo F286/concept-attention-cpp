@@ -1,4 +1,5 @@
 #include "mini_torch/linear.h"
+#include "mini_torch/optim.h"
 #include <random>
 
 Linear::Linear(size_t in, size_t out)
@@ -19,18 +20,30 @@ void Linear::step(const Tensor &input, const Tensor &grad_output, float lr) {
     size_t batch = input.shape()[0];
     size_t in_dim = m_weight.shape()[0];
     size_t out_dim = m_weight.shape()[1];
+
+    Tensor grad_w(m_weight.shape());
+    Tensor grad_b({1, out_dim});
+
     for (size_t b = 0; b < batch; ++b) {
         for (size_t i = 0; i < in_dim; ++i) {
             for (size_t j = 0; j < out_dim; ++j) {
                 size_t w_idx = i * out_dim + j;
-                m_weight[w_idx] -= lr *
-                    input[b * in_dim + i] * grad_output[b * out_dim + j];
+                grad_w[w_idx] += input[b * in_dim + i] * grad_output[b * out_dim + j];
             }
         }
     }
+
     for (size_t j = 0; j < out_dim; ++j) {
-        float grad_sum = 0.0f;
-        for (size_t b = 0; b < batch; ++b) grad_sum += grad_output[b * out_dim + j];
-        m_bias[j] -= lr * grad_sum;
+        for (size_t b = 0; b < batch; ++b)
+            grad_b[j] += grad_output[b * out_dim + j];
     }
+
+    SGD opt(lr);
+    opt.step(m_weight, grad_w);
+    opt.step(m_bias, grad_b);
 }
+
+Tensor &Linear::weight() { return m_weight; }
+const Tensor &Linear::weight() const { return m_weight; }
+Tensor &Linear::bias() { return m_bias; }
+const Tensor &Linear::bias() const { return m_bias; }
