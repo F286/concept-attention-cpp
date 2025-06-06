@@ -12,12 +12,12 @@ float MSELoss::operator()(const Tensor &pred, const Tensor &target) const {
     return loss / pred.size();
 }
 
-Tensor MSELoss::backward(const Tensor &pred, const Tensor &target) const {
+void MSELoss::backward(const Tensor &pred, const Tensor &target) const {
     assert(pred.shape() == target.shape());
-    Tensor grad(pred.shape());
+    Tensor &grad = const_cast<Tensor&>(pred).grad();
+    grad.zero_grad();
     for (size_t i = 0; i < pred.size(); ++i)
-        grad[i] = 2.0f * (pred[i] - target[i]) / static_cast<float>(pred.size());
-    return grad;
+        grad[i] += 2.0f * (pred[i] - target[i]) / static_cast<float>(pred.size());
 }
 
 float CrossEntropyLoss::operator()(const Tensor &logits, const std::vector<size_t> &target) const {
@@ -40,12 +40,13 @@ float CrossEntropyLoss::operator()(const Tensor &logits, const std::vector<size_
     return loss / static_cast<float>(n);
 }
 
-Tensor CrossEntropyLoss::backward(const Tensor &logits, const std::vector<size_t> &target) const {
+void CrossEntropyLoss::backward(const Tensor &logits, const std::vector<size_t> &target) const {
     assert(logits.shape().size() == 2);
     size_t n = logits.shape()[0];
     size_t c = logits.shape()[1];
     assert(target.size() == n);
-    Tensor grad(logits.shape());
+    Tensor &grad = const_cast<Tensor&>(logits).grad();
+    grad.zero_grad();
     for (size_t i = 0; i < n; ++i) {
         float max_logit = logits.at(i,0);
         for (size_t j = 1; j < c; ++j)
@@ -55,8 +56,7 @@ Tensor CrossEntropyLoss::backward(const Tensor &logits, const std::vector<size_t
             sum += std::exp(logits.at(i,j) - max_logit);
         for (size_t j = 0; j < c; ++j) {
             float soft = std::exp(logits.at(i,j) - max_logit) / sum;
-            grad.at(i,j) = (soft - (j == target[i] ? 1.0f : 0.0f)) / static_cast<float>(n);
+            grad.at(i,j) += (soft - (j == target[i] ? 1.0f : 0.0f)) / static_cast<float>(n);
         }
     }
-    return grad;
 }

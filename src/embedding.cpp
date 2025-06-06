@@ -2,7 +2,7 @@
 #include <random>
 
 Embedding::Embedding(size_t num_embeddings, size_t embedding_dim)
-    : m_weight({num_embeddings, embedding_dim}) {
+    : m_weight({num_embeddings, embedding_dim}, 0.0f, true) {
     std::mt19937 rng(42);
     std::uniform_real_distribution<float> dist(-0.1f, 0.1f);
     for (size_t i = 0; i < m_weight.size(); ++i)
@@ -23,4 +23,8 @@ Tensor Embedding::operator()(const std::vector<size_t> &indices) const {
 
 Tensor &Embedding::weight() { return m_weight; }
 const Tensor &Embedding::weight() const { return m_weight; }
+
+std::vector<Tensor*> Embedding::parameters() {
+    return {&m_weight};
+}
 

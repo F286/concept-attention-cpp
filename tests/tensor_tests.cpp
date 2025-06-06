@@ -6,7 +6,7 @@ TEST_CASE("tensor add") {
     Tensor t({2, 2}, 1.0f);
     t[0] = 2.0f;
     Tensor t2({2, 2}, 3.0f);
-    auto sum = Tensor::add(t, t2);
+    auto sum = t + t2;
     CHECK(sum.size() == 4);
     CHECK(sum[0] == doctest::Approx(5.0f));
 }
@@ -17,8 +17,8 @@ TEST_CASE("tensor sub mul") {
     Tensor b({2, 2});
     a.fill(2.0f);
     b.fill(1.5f);
-    auto diff = Tensor::sub(a, b);
-    auto prod = Tensor::mul(a, b);
+    auto diff = a - b;
+    auto prod = a * b;
     CHECK(diff[0] == doctest::Approx(0.5f));
     CHECK(prod[0] == doctest::Approx(3.0f));
 }
@@ -31,7 +31,7 @@ TEST_CASE("tensor matmul") {
     float vals_b[] = {7, 8, 9, 10, 11, 12};
     for (size_t i = 0; i < 6; ++i) a[i] = vals_a[i];
     for (size_t i = 0; i < 6; ++i) b[i] = vals_b[i];
-    auto out = Tensor::matmul(a, b);
+    auto out = a.matmul(b);
     CHECK(out.shape() == std::vector<size_t>{2, 2});
     CHECK(out[0] == doctest::Approx(58.0f));
     CHECK(out[1] == doctest::Approx(64.0f));
@@ -44,7 +44,7 @@ TEST_CASE("tensor relu") {
     Tensor t({1, 4});
     float vals[] = {-1.0f, 0.0f, 2.0f, -3.0f};
     for (size_t i = 0; i < 4; ++i) t[i] = vals[i];
-    t.relu();
+    t.relu_();
     CHECK(t[0] == doctest::Approx(0.0f));
     CHECK(t[1] == doctest::Approx(0.0f));
     CHECK(t[2] == doctest::Approx(2.0f));

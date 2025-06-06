@@ -1,15 +1,17 @@
 #pragma once
 #include "tensor.h"
+#include "module.h"
 
 /// @brief Simple affine transformation layer
-class Linear {
+class Linear : public Module {
 public:
     /// @brief Construct layer with input and output dimensions
-    Linear(size_t in, size_t out);
+    Linear(size_t in_features, size_t out_features);
     /// @brief Forward pass
     Tensor operator()(const Tensor &input) const;
-    /// @brief Gradient descent update using output gradient
-    void step(const Tensor &input, const Tensor &grad_output, float lr);
+
+    /// @brief List of trainable parameters
+    std::vector<Tensor*> parameters() override;
 
     /// @brief Mutable access to weight matrix
     Tensor &weight();

@@ -92,8 +92,10 @@ public:
     };
 
     /// @brief Construct loader referencing dataset
-    DataLoader(const D &dataset, size_t batch_size, bool shuffle = false)
-        : m_dataset(&dataset), m_batch_size(batch_size) {
+    DataLoader(const D &dataset, size_t batch_size, bool shuffle = false,
+              size_t num_workers = 0, bool pin_memory = false)
+        : m_dataset(&dataset), m_batch_size(batch_size),
+          m_num_workers(num_workers), m_pin_memory(pin_memory) {
         m_order.resize(dataset.size());
         std::iota(m_order.begin(), m_order.end(), 0);
         if (shuffle) {
@@ -112,6 +114,8 @@ public:
 private:
     const D *m_dataset; ///< referenced dataset
     size_t m_batch_size; ///< batch size
+    size_t m_num_workers; ///< worker count (unused)
+    bool m_pin_memory; ///< pin memory flag (unused)
     std::vector<size_t> m_order; ///< sample ordering
 };
 

@@ -40,3 +40,11 @@ Tensor GenesisAttention::operator()(const Tensor &q, const Tensor &k, const Tens
 
     return Tensor::matmul(min_sim, v);
 }
+
+std::vector<Tensor*> GenesisAttention::parameters() {
+    if (!m_initialized) return {};
+    std::vector<Tensor*> params;
+    for (auto &t : m_wq) params.push_back(&t);
+    for (auto &t : m_wk) params.push_back(&t);
+    return params;
+}
