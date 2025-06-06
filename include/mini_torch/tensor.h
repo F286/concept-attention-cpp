@@ -18,6 +18,18 @@ public:
     float &operator[](size_t idx);
     /// @brief Const access by flat index
     const float &operator[](size_t idx) const;
+    /// @brief Access element by row and column in 2D tensor
+    float &at(size_t row, size_t col);
+    /// @brief Const access by row and column in 2D tensor
+    const float &at(size_t row, size_t col) const;
+    /// @brief Iterator to first element
+    auto begin() { return m_data.begin(); }
+    /// @brief Const iterator to first element
+    auto begin() const { return m_data.begin(); }
+    /// @brief Iterator past last element
+    auto end() { return m_data.end(); }
+    /// @brief Const iterator past last element
+    auto end() const { return m_data.end(); }
     /// @brief Return underlying data size
     size_t size() const;
     /// @brief Return tensor shape
@@ -26,12 +38,18 @@ public:
     static Tensor matmul(const Tensor &a, const Tensor &b);
     /// @brief Elementwise addition
     static Tensor add(const Tensor &a, const Tensor &b);
+    /// @brief Elementwise subtraction
+    static Tensor sub(const Tensor &a, const Tensor &b);
+    /// @brief Elementwise multiplication
+    static Tensor mul(const Tensor &a, const Tensor &b);
     /// @brief Transpose 2D tensor
     static Tensor transpose(const Tensor &t);
     /// @brief Row-wise softmax for a 2D tensor
     static Tensor softmax(const Tensor &t);
     /// @brief Apply ReLU
     void relu();
+    /// @brief Fill tensor with value
+    void fill(float v);
 
 private:
     std::vector<size_t> m_shape; ///< tensor dimensions

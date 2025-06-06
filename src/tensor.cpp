@@ -14,6 +14,18 @@ const float &Tensor::operator[](size_t idx) const {
     return m_data[idx];
 }
 
+float &Tensor::at(size_t row, size_t col) {
+    assert(m_shape.size() == 2);
+    size_t cols = m_shape[1];
+    return m_data[row * cols + col];
+}
+
+const float &Tensor::at(size_t row, size_t col) const {
+    assert(m_shape.size() == 2);
+    size_t cols = m_shape[1];
+    return m_data[row * cols + col];
+}
+
 size_t Tensor::size() const {
     return m_data.size();
 }
@@ -47,10 +59,32 @@ Tensor Tensor::add(const Tensor &a, const Tensor &b) {
     return out;
 }
 
+Tensor Tensor::sub(const Tensor &a, const Tensor &b) {
+    assert(a.m_shape == b.m_shape);
+    Tensor out(a.m_shape);
+    for (size_t i = 0; i < a.size(); ++i) {
+        out.m_data[i] = a.m_data[i] - b.m_data[i];
+    }
+    return out;
+}
+
+Tensor Tensor::mul(const Tensor &a, const Tensor &b) {
+    assert(a.m_shape == b.m_shape);
+    Tensor out(a.m_shape);
+    for (size_t i = 0; i < a.size(); ++i) {
+        out.m_data[i] = a.m_data[i] * b.m_data[i];
+    }
+    return out;
+}
+
 void Tensor::relu() {
     for (auto &v : m_data) {
         if (v < 0.0f) v = 0.0f;
     }
+}
+
+void Tensor::fill(float v) {
+    std::fill(m_data.begin(), m_data.end(), v);
 }
 
 Tensor Tensor::transpose(const Tensor &t) {

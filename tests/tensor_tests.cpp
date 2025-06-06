@@ -11,6 +11,18 @@ TEST_CASE("tensor add") {
     CHECK(sum[0] == doctest::Approx(5.0f));
 }
 
+/// @brief Verify tensor subtract and multiply
+TEST_CASE("tensor sub mul") {
+    Tensor a({2, 2});
+    Tensor b({2, 2});
+    a.fill(2.0f);
+    b.fill(1.5f);
+    auto diff = Tensor::sub(a, b);
+    auto prod = Tensor::mul(a, b);
+    CHECK(diff[0] == doctest::Approx(0.5f));
+    CHECK(prod[0] == doctest::Approx(3.0f));
+}
+
 /// @brief Verify tensor matrix multiplication
 TEST_CASE("tensor matmul") {
     Tensor a({2, 3});
@@ -37,6 +49,15 @@ TEST_CASE("tensor relu") {
     CHECK(t[1] == doctest::Approx(0.0f));
     CHECK(t[2] == doctest::Approx(2.0f));
     CHECK(t[3] == doctest::Approx(0.0f));
+}
+
+/// @brief Verify 2D indexing and fill
+TEST_CASE("tensor at and fill") {
+    Tensor t({2, 3});
+    t.fill(0.0f);
+    t.at(1, 2) = 5.0f;
+    CHECK(t[5] == doctest::Approx(5.0f));
+    CHECK(t.at(1, 2) == doctest::Approx(5.0f));
 }
 
 /// @brief Verify transpose and softmax
