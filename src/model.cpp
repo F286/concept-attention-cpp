@@ -1,4 +1,5 @@
 #include "mini_torch/model.h"
+#include "mini_torch/loss.h"
 
 Model::Model(size_t dim)
     : m_proj_q(dim, dim), m_proj_k(dim, dim), m_proj_v(dim, dim), m_out(dim, dim) {}
@@ -17,8 +18,9 @@ void Model::train_step(const Tensor &input, const Tensor &target, float lr) {
     auto v = m_proj_v(input);
     auto attn = Attention::apply(q, k, v);
     auto out = m_out(attn);
-    Tensor grad(out.shape());
-    for (size_t i = 0; i < out.size(); ++i) grad[i] = out[i] - target[i];
+    MSELoss loss;
+    Tensor grad = loss.backward(out, target);
+    (void)loss(out, target);
     m_out.step(attn, grad, lr);
 }
 
@@ -39,7 +41,8 @@ void GenesisModel::train_step(const Tensor &input, const Tensor &target, float l
     auto v = m_proj_v(input);
     auto attn = m_attn(q, k, v);
     auto out = m_out(attn);
-    Tensor grad(out.shape());
-    for (size_t i = 0; i < out.size(); ++i) grad[i] = out[i] - target[i];
+    MSELoss loss;
+    Tensor grad = loss.backward(out, target);
+    (void)loss(out, target);
     m_out.step(attn, grad, lr);
 }

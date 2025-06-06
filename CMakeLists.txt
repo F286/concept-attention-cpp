@@ -10,6 +10,8 @@ add_library(mini_torch
     src/tensor.cpp
     src/linear.cpp
     src/attention.cpp
+    src/loss.cpp
+    src/optim.cpp
     src/model.cpp
 )
 
@@ -20,6 +22,9 @@ enable_testing()
 add_executable(all_tests
     tests/main.cpp
     tests/tensor_tests.cpp
+    tests/linear_tests.cpp
+    tests/loss_tests.cpp
+    tests/optim_tests.cpp
     tests/attention_tests.cpp
     tests/model_tests.cpp
     tests/train_run_tests.cpp
