@@ -21,6 +21,9 @@ target_link_libraries(genesis_model PRIVATE mini_torch)
 add_executable(baseline_model src/baseline_main.cpp)
 target_link_libraries(baseline_model PRIVATE mini_torch)
 
+add_executable(train_models src/train_models.cpp)
+target_link_libraries(train_models PRIVATE mini_torch)
+
 enable_testing()
 add_executable(tensor_tests tests/tensor_tests.cpp)
 target_link_libraries(tensor_tests PRIVATE mini_torch)

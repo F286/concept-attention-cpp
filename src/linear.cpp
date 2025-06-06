@@ -14,3 +14,23 @@ Tensor Linear::operator()(const Tensor &input) const {
     for (size_t i = 0; i < out.size(); ++i) out[i] += m_bias[i % m_bias.shape()[1]];
     return out;
 }
+
+void Linear::step(const Tensor &input, const Tensor &grad_output, float lr) {
+    size_t batch = input.shape()[0];
+    size_t in_dim = m_weight.shape()[0];
+    size_t out_dim = m_weight.shape()[1];
+    for (size_t b = 0; b < batch; ++b) {
+        for (size_t i = 0; i < in_dim; ++i) {
+            for (size_t j = 0; j < out_dim; ++j) {
+                size_t w_idx = i * out_dim + j;
+                m_weight[w_idx] -= lr *
+                    input[b * in_dim + i] * grad_output[b * out_dim + j];
+            }
+        }
+    }
+    for (size_t j = 0; j < out_dim; ++j) {
+        float grad_sum = 0.0f;
+        for (size_t b = 0; b < batch; ++b) grad_sum += grad_output[b * out_dim + j];
+        m_bias[j] -= lr * grad_sum;
+    }
+}

@@ -9,6 +9,8 @@ public:
     Model(size_t dim);
     /// @brief Forward pass
     Tensor operator()(const Tensor &input) const;
+    /// @brief Train output layer on one sample
+    void train_step(const Tensor &input, const Tensor &target, float lr);
 
 private:
     Linear m_proj_q; ///< query projection
@@ -24,6 +26,8 @@ public:
     GenesisModel(size_t dim);
     /// @brief Forward pass
     Tensor operator()(const Tensor &input) const;
+    /// @brief Train output layer on one sample
+    void train_step(const Tensor &input, const Tensor &target, float lr);
 
 private:
     Linear m_proj_q;         ///< query projection
