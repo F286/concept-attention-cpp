@@ -4,4 +4,4 @@
 - [ ] Implement baseline transformer model
 - [ ] Implement genesis attention mechanism
 - [x] Provide tiny training script comparing models
-- [ ] Expand unit tests for tensor and attention modules
+- [x] Expand unit tests for tensor and attention modules
