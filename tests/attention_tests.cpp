@@ -24,3 +24,16 @@ TEST_CASE("genesis attention") {
     auto out = ga(q, k, v);
     CHECK(out.shape() == std::vector<size_t>{2, 4});
 }
+
+/// @brief Genesis attention deterministic behaviour
+TEST_CASE("genesis attention deterministic") {
+    Tensor q({2, 2}, 0.1f);
+    Tensor k({2, 2}, 0.1f);
+    Tensor v({2, 2}, 0.2f);
+    GenesisAttention ga(2, 1);
+    auto out1 = ga(q, k, v);
+    auto out2 = ga(q, k, v);
+    CHECK(out1.size() == out2.size());
+    for (size_t i = 0; i < out1.size(); ++i)
+        CHECK(out1[i] == doctest::Approx(out2[i]));
+}

@@ -1,5 +1,7 @@
 #pragma once
 #include "tensor.h"
+#include <vector>
+#include <random>
 
 /// @brief Standard scaled dot product attention
 class Attention {
@@ -17,6 +19,10 @@ public:
     Tensor operator()(const Tensor &q, const Tensor &k, const Tensor &v) const;
 
 private:
-    size_t m_concepts; ///< number of projections
-    size_t m_dim;      ///< projection dimension
+    mutable bool m_initialized;   ///< lazy weight initialization flag
+    size_t m_concepts;            ///< number of projections
+    size_t m_dim;                 ///< projection dimension
+    mutable std::vector<Tensor> m_wq; ///< query projections
+    mutable std::vector<Tensor> m_wk; ///< key projections
+    mutable std::mt19937 m_rng;       ///< random generator
 };
