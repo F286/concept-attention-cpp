@@ -2,6 +2,7 @@
 #include "mini_torch/model.h"
 #include <random>
 #include <sstream>
+#include <fstream>
 #include <iostream>
 
 /// @brief Execute five-epoch training and write losses to stream
@@ -10,12 +11,15 @@ static void run_training(std::ostream &os) {
     const float lr = 0.1f;
     const int epochs = 5;
 
-    std::mt19937 rng(0);
-    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    std::ifstream file("../data/tinyshakespeare.txt");
+    std::string buf(dim + 1, '\0');
+    file.read(buf.data(), buf.size());
     Tensor input({1, dim});
     Tensor target({1, dim});
-    for (size_t i = 0; i < input.size(); ++i) input[i] = dist(rng);
-    for (size_t i = 0; i < target.size(); ++i) target[i] = dist(rng);
+    for (size_t i = 0; i < dim; ++i) {
+        input[i] = static_cast<unsigned char>(buf[i]) / 255.0f;
+        target[i] = static_cast<unsigned char>(buf[i + 1]) / 255.0f;
+    }
 
     Model baseline(dim);
     GenesisModel genesis(dim);
