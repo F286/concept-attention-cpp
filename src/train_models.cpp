@@ -3,9 +3,9 @@
 #include <random>
 
 /**
- * @brief Tiny training loop comparing baseline and genesis models.
+ * @brief Run tiny training loop comparing baseline and genesis models
  */
-int main() {
+int run_training_demo() {
     std::mt19937 rng(0);
     std::uniform_real_distribution<float> dist(0.0f, 1.0f);
     Tensor input({4,4});
@@ -32,3 +32,4 @@ int main() {
     }
     return 0;
 }
+
