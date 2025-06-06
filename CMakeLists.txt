@@ -15,20 +15,8 @@ add_library(mini_torch
 
 target_include_directories(mini_torch PUBLIC include)
 
-add_executable(genesis_model src/genesis_model.cpp)
-target_link_libraries(genesis_model PRIVATE mini_torch)
-
-add_executable(baseline_model src/baseline_main.cpp)
-target_link_libraries(baseline_model PRIVATE mini_torch)
-
-add_executable(train_models src/train_models.cpp)
-target_link_libraries(train_models PRIVATE mini_torch)
-
 enable_testing()
-add_executable(tensor_tests tests/tensor_tests.cpp)
-target_link_libraries(tensor_tests PRIVATE mini_torch)
-add_test(NAME tensor_tests COMMAND tensor_tests)
 
-add_executable(attention_tests tests/attention_tests.cpp)
-target_link_libraries(attention_tests PRIVATE mini_torch)
-add_test(NAME attention_tests COMMAND attention_tests)
+add_executable(all_tests tests/all_tests.cpp)
+target_link_libraries(all_tests PRIVATE mini_torch)
+add_test(NAME all_tests COMMAND all_tests)
