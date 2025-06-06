@@ -1,4 +1,5 @@
 #include "mini_torch/tensor.h"
+#include "mini_torch/autograd.h"
 #include <numeric>
 #include <algorithm>
 #include <cmath>
@@ -16,7 +17,7 @@ Tensor::Tensor(std::vector<size_t> shape, float value, bool requires_grad)
 
 Tensor::Tensor(const Tensor& other)
     : m_shape(other.m_shape), m_size(other.m_size), m_data(other.m_data),
-      m_requires_grad(other.m_requires_grad) {
+      m_requires_grad(other.m_requires_grad), m_grad_fn(other.m_grad_fn) {
     if (other.m_grad)
         m_grad = std::make_unique<Tensor>(*other.m_grad);
 }
@@ -27,6 +28,7 @@ Tensor& Tensor::operator=(const Tensor& other) {
     m_size = other.m_size;
     m_data = other.m_data;
     m_requires_grad = other.m_requires_grad;
+    m_grad_fn = other.m_grad_fn;
     if (other.m_grad)
         m_grad = std::make_unique<Tensor>(*other.m_grad);
     else
@@ -77,6 +79,10 @@ Tensor Tensor::matmul(const Tensor &a, const Tensor &b) {
             out[i * b.m_shape[1] + j] = sum;
         }
     }
+    if (a.m_requires_grad || b.m_requires_grad) {
+        out.m_requires_grad = true;
+        out.m_grad_fn = std::make_shared<MatMulFunction>(const_cast<Tensor*>(&a), const_cast<Tensor*>(&b));
+    }
     return out;
 }
 
@@ -85,6 +91,10 @@ Tensor Tensor::add(const Tensor &a, const Tensor &b) {
     Tensor out(a.m_shape);
     for (size_t i = 0; i < a.m_data.size(); ++i)
         out.m_data[i] = a.m_data[i] + b.m_data[i];
+    if (a.m_requires_grad || b.m_requires_grad) {
+        out.m_requires_grad = true;
+        out.m_grad_fn = std::make_shared<AddFunction>(const_cast<Tensor*>(&a), const_cast<Tensor*>(&b));
+    }
     return out;
 }
 
@@ -93,6 +103,10 @@ Tensor Tensor::sub(const Tensor &a, const Tensor &b) {
     Tensor out(a.m_shape);
     for (size_t i = 0; i < a.m_data.size(); ++i)
         out.m_data[i] = a.m_data[i] - b.m_data[i];
+    if (a.m_requires_grad || b.m_requires_grad) {
+        out.m_requires_grad = true;
+        out.m_grad_fn = std::make_shared<SubFunction>(const_cast<Tensor*>(&a), const_cast<Tensor*>(&b));
+    }
     return out;
 }
 
@@ -101,6 +115,10 @@ Tensor Tensor::mul(const Tensor &a, const Tensor &b) {
     Tensor out(a.m_shape);
     for (size_t i = 0; i < a.m_data.size(); ++i)
         out.m_data[i] = a.m_data[i] * b.m_data[i];
+    if (a.m_requires_grad || b.m_requires_grad) {
+        out.m_requires_grad = true;
+        out.m_grad_fn = std::make_shared<MulFunction>(const_cast<Tensor*>(&a), const_cast<Tensor*>(&b));
+    }
     return out;
 }
 
@@ -122,7 +140,15 @@ Tensor Tensor::operator*(const Tensor &other) const {
 
 Tensor Tensor::relu() const {
     Tensor out = *this;
-    out.relu_();
+    Tensor mask(m_shape);
+    for (size_t i = 0; i < m_size; ++i) {
+        mask[i] = (*this)[i] > 0.0f ? 1.0f : 0.0f;
+        out[i] = (*this)[i] > 0.0f ? (*this)[i] : 0.0f;
+    }
+    if (m_requires_grad) {
+        out.m_requires_grad = true;
+        out.m_grad_fn = std::make_shared<ReLUFunction>(const_cast<Tensor*>(this), mask);
+    }
     return out;
 }
 
@@ -143,6 +169,10 @@ Tensor Tensor::transpose(const Tensor &t) {
     for (size_t i = 0; i < t.m_shape[0]; ++i)
         for (size_t j = 0; j < t.m_shape[1]; ++j)
             out[j * t.m_shape[0] + i] = t[i * t.m_shape[1] + j];
+    if (t.m_requires_grad) {
+        out.m_requires_grad = true;
+        out.m_grad_fn = std::make_shared<TransposeFunction>(const_cast<Tensor*>(&t));
+    }
     return out;
 }
 
@@ -164,6 +194,10 @@ Tensor Tensor::softmax(const Tensor &t) {
         }
         for (size_t c = 0; c < cols; ++c)
             out[r * cols + c] /= sum;
+    }
+    if (t.m_requires_grad) {
+        out.m_requires_grad = true;
+        out.m_grad_fn = std::make_shared<SoftmaxFunction>(const_cast<Tensor*>(&t), out);
     }
     return out;
 }
@@ -187,4 +221,19 @@ bool Tensor::requires_grad() const {
 void Tensor::zero_grad() {
     if (m_grad)
         m_grad->fill(0.0f);
+}
+
+void Tensor::backward() {
+    Tensor ones(m_shape, 1.0f);
+    backward(ones);
+}
+
+void Tensor::backward(const Tensor &grad_output) {
+    if (!m_requires_grad)
+        return;
+    Tensor &g = grad();
+    for (size_t i = 0; i < g.size(); ++i)
+        g[i] += grad_output[i];
+    if (m_grad_fn)
+        m_grad_fn->backward(grad_output);
 }

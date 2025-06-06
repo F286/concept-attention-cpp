@@ -5,6 +5,8 @@
 #include <experimental/simd>
 #include <memory>
 
+class Function;
+
 using floatv = std::experimental::native_simd<float>;
 
 /// @brief Proxy reference to a float inside a SIMD chunk
@@ -94,6 +96,10 @@ public:
     bool requires_grad() const;
     /// @brief Zero stored gradients
     void zero_grad();
+    /// @brief Backpropagate using unit gradient
+    void backward();
+    /// @brief Backpropagate with supplied gradient
+    void backward(const Tensor &grad_output);
 
 private:
     std::vector<size_t> m_shape; ///< tensor dimensions
@@ -101,6 +107,7 @@ private:
     std::vector<floatv> m_data;  ///< SIMD element storage
     mutable std::unique_ptr<Tensor> m_grad; ///< stored gradient
     bool m_requires_grad{};      ///< autograd flag
+    std::shared_ptr<Function> m_grad_fn; ///< backward function
 };
 
 /// @brief Concept requirement similar to std::ranges::range

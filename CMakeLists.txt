@@ -8,6 +8,7 @@ include_directories(include)
 
 add_library(mini_torch
     src/tensor.cpp
+    src/autograd.cpp
     src/linear.cpp
     src/attention.cpp
     src/loss.cpp
@@ -26,6 +27,7 @@ add_executable(all_tests
     tests/linear_tests.cpp
     tests/loss_tests.cpp
     tests/optim_tests.cpp
+    tests/autograd_tests.cpp
     tests/attention_tests.cpp
     tests/embedding_tests.cpp
     tests/data_tests.cpp
