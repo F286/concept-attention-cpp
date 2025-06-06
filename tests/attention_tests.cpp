@@ -11,8 +11,8 @@ TEST_CASE("standard attention") {
     v[0] = 2.0f; v[1] = 3.0f; v[2] = 4.0f; v[3] = 5.0f;
     auto out = Attention::apply(q, k, v);
     CHECK(out.shape() == std::vector<size_t>{1, 2});
-    CHECK(out[0] == doctest::Approx(2.0f));
-    CHECK(out[1] == doctest::Approx(3.0f));
+    CHECK(out[0] == doctest::Approx(2.6604769f));
+    CHECK(out[1] == doctest::Approx(3.6604769f));
 }
 
 /// @brief Verify genesis attention shape

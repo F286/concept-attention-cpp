@@ -3,10 +3,12 @@
 #include <random>
 
 Tensor Attention::apply(const Tensor &q, const Tensor &k, const Tensor &v) {
-    auto scores = Tensor::matmul(q, Tensor::matmul(k, v));
-    // This is a placeholder simplistic attention, not scaled dot product
-    scores.relu();
-    return scores;
+    auto kt = Tensor::transpose(k);
+    auto scores = Tensor::matmul(q, kt);
+    float scale = 1.0f / std::sqrt(static_cast<float>(q.shape()[1]));
+    for (size_t i = 0; i < scores.size(); ++i) scores[i] *= scale;
+    auto probs = Tensor::softmax(scores);
+    return Tensor::matmul(probs, v);
 }
 
 GenesisAttention::GenesisAttention(size_t concepts, size_t dim)

@@ -24,6 +24,10 @@ public:
     static Tensor matmul(const Tensor &a, const Tensor &b);
     /// @brief Elementwise addition
     static Tensor add(const Tensor &a, const Tensor &b);
+    /// @brief Transpose 2D tensor
+    static Tensor transpose(const Tensor &t);
+    /// @brief Row-wise softmax for a 2D tensor
+    static Tensor softmax(const Tensor &t);
     /// @brief Apply ReLU
     void relu();
 
