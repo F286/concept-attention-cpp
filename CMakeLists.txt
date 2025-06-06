@@ -13,6 +13,7 @@ add_library(mini_torch
     src/loss.cpp
     src/optim.cpp
     src/model.cpp
+    src/embedding.cpp
 )
 
 target_include_directories(mini_torch PUBLIC include)
@@ -26,6 +27,7 @@ add_executable(all_tests
     tests/loss_tests.cpp
     tests/optim_tests.cpp
     tests/attention_tests.cpp
+    tests/embedding_tests.cpp
     tests/data_tests.cpp
     tests/model_tests.cpp
     tests/train_run_tests.cpp
