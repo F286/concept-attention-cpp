@@ -8,5 +8,5 @@
  - [ ] Implement basic tokenizer mirroring torchtext's interface
  - [ ] Implement simple Dataset and DataLoader classes like torch.utils.data
  - [ ] Add nn::Embedding analogue for token lookups
- - [ ] Provide CrossEntropyLoss module
+ - [x] Provide CrossEntropyLoss module
  - [ ] Implement LayerNorm and Dropout layers
