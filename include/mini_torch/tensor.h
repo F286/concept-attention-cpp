@@ -2,6 +2,27 @@
 #include <vector>
 #include <cassert>
 #include <concepts>
+#include <experimental/simd>
+
+using floatv = std::experimental::native_simd<float>;
+
+/// @brief Proxy reference to a float inside a SIMD chunk
+struct ScalarRef {
+    floatv* chunk; ///< owning SIMD chunk
+    size_t lane;   ///< lane index
+    /// @brief Convert to float
+    operator float() const { return (*chunk)[lane]; }
+    /// @brief Assign value
+    ScalarRef& operator=(float v) { (*chunk)[lane] = v; return *this; }
+    /// @brief Add value
+    ScalarRef& operator+=(float v) { (*chunk)[lane] += v; return *this; }
+    /// @brief Subtract value
+    ScalarRef& operator-=(float v) { (*chunk)[lane] -= v; return *this; }
+    /// @brief Multiply value
+    ScalarRef& operator*=(float v) { (*chunk)[lane] *= v; return *this; }
+    /// @brief Divide value
+    ScalarRef& operator/=(float v) { (*chunk)[lane] /= v; return *this; }
+};
 
 /**
  * @brief A minimal tensor container mimicking a subset of std::vector for numeric data.
@@ -15,13 +36,13 @@ public:
     /// @brief Construct tensor with shape and initial value
     Tensor(std::vector<size_t> shape, float value = 0.0f);
     /// @brief Access element by flat index
-    float &operator[](size_t idx);
+    ScalarRef operator[](size_t idx);
     /// @brief Const access by flat index
-    const float &operator[](size_t idx) const;
+    float operator[](size_t idx) const;
     /// @brief Access element by row and column in 2D tensor
-    float &at(size_t row, size_t col);
+    ScalarRef at(size_t row, size_t col);
     /// @brief Const access by row and column in 2D tensor
-    const float &at(size_t row, size_t col) const;
+    float at(size_t row, size_t col) const;
     /// @brief Iterator to first element
     auto begin() { return m_data.begin(); }
     /// @brief Const iterator to first element
@@ -53,7 +74,8 @@ public:
 
 private:
     std::vector<size_t> m_shape; ///< tensor dimensions
-    std::vector<float> m_data;   ///< element storage
+    size_t m_size{};             ///< scalar element count
+    std::vector<floatv> m_data;  ///< SIMD element storage
 };
 
 /// @brief Concept requirement similar to std::ranges::range
