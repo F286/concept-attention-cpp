@@ -39,4 +39,22 @@ TEST_CASE("tensor relu") {
     CHECK(t[3] == doctest::Approx(0.0f));
 }
 
+/// @brief Verify transpose and softmax
+TEST_CASE("tensor transpose softmax") {
+    Tensor t({2, 2});
+    t[0] = 1.0f; t[1] = 2.0f;
+    t[2] = 3.0f; t[3] = 4.0f;
+    auto tt = Tensor::transpose(t);
+    CHECK(tt.shape() == std::vector<size_t>{2, 2});
+    CHECK(tt[0] == doctest::Approx(1.0f));
+    CHECK(tt[1] == doctest::Approx(3.0f));
+    CHECK(tt[2] == doctest::Approx(2.0f));
+    CHECK(tt[3] == doctest::Approx(4.0f));
+
+    auto soft = Tensor::softmax(t);
+    CHECK(soft.shape() == t.shape());
+    CHECK(soft[0] + soft[1] == doctest::Approx(1.0f));
+    CHECK(soft[2] + soft[3] == doctest::Approx(1.0f));
+}
+
 static_assert(TensorLike<Tensor>);

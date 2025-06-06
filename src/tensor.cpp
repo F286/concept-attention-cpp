@@ -1,6 +1,7 @@
 #include "mini_torch/tensor.h"
 #include <numeric>
 #include <algorithm>
+#include <cmath>
 
 Tensor::Tensor(std::vector<size_t> shape, float value)
     : m_shape(std::move(shape)), m_data(std::accumulate(m_shape.begin(), m_shape.end(), 1u, std::multiplies<>()), value) {}
@@ -50,4 +51,35 @@ void Tensor::relu() {
     for (auto &v : m_data) {
         if (v < 0.0f) v = 0.0f;
     }
+}
+
+Tensor Tensor::transpose(const Tensor &t) {
+    assert(t.m_shape.size() == 2);
+    Tensor out({t.m_shape[1], t.m_shape[0]});
+    for (size_t i = 0; i < t.m_shape[0]; ++i)
+        for (size_t j = 0; j < t.m_shape[1]; ++j)
+            out.m_data[j * t.m_shape[0] + i] = t.m_data[i * t.m_shape[1] + j];
+    return out;
+}
+
+Tensor Tensor::softmax(const Tensor &t) {
+    assert(t.m_shape.size() == 2);
+    Tensor out(t.m_shape);
+    size_t rows = t.m_shape[0];
+    size_t cols = t.m_shape[1];
+    for (size_t r = 0; r < rows; ++r) {
+        float max_v = t.m_data[r * cols];
+        for (size_t c = 1; c < cols; ++c)
+            if (t.m_data[r * cols + c] > max_v)
+                max_v = t.m_data[r * cols + c];
+        float sum = 0.0f;
+        for (size_t c = 0; c < cols; ++c) {
+            float e = std::exp(t.m_data[r * cols + c] - max_v);
+            out.m_data[r * cols + c] = e;
+            sum += e;
+        }
+        for (size_t c = 0; c < cols; ++c)
+            out.m_data[r * cols + c] /= sum;
+    }
+    return out;
 }
