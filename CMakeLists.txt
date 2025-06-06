@@ -15,6 +15,9 @@ add_library(mini_torch
     src/optim.cpp
     src/model.cpp
     src/embedding.cpp
+    src/tokenizer.cpp
+    src/layer_norm.cpp
+    src/dropout.cpp
 )
 
 target_include_directories(mini_torch PUBLIC include)
@@ -30,6 +33,9 @@ add_executable(all_tests
     tests/autograd_tests.cpp
     tests/attention_tests.cpp
     tests/embedding_tests.cpp
+    tests/tokenizer_tests.cpp
+    tests/layer_norm_tests.cpp
+    tests/dropout_tests.cpp
     tests/data_tests.cpp
     tests/model_tests.cpp
     tests/train_run_tests.cpp
