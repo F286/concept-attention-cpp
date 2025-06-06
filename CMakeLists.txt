@@ -26,6 +26,7 @@ add_executable(all_tests
     tests/loss_tests.cpp
     tests/optim_tests.cpp
     tests/attention_tests.cpp
+    tests/data_tests.cpp
     tests/model_tests.cpp
     tests/train_run_tests.cpp
     tests/pytorch_parity_tests.cpp
