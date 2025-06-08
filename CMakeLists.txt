@@ -39,6 +39,7 @@ add_executable(all_tests
     tests/data_tests.cpp
     tests/model_tests.cpp
     tests/train_run_tests.cpp
+    tests/overfit_digits_tests.cpp
     tests/pytorch_parity_tests.cpp
 )
 target_include_directories(all_tests PRIVATE tests)
