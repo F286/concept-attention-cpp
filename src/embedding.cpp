@@ -11,14 +11,13 @@ Embedding::Embedding(size_t num_embeddings, size_t embedding_dim)
 
 Tensor Embedding::operator()(const std::vector<size_t> &indices) const {
     size_t n = indices.size();
+    size_t vocab = m_weight.shape()[0];
     size_t dim = m_weight.shape()[1];
-    Tensor out({n, dim});
-    for (size_t i = 0; i < n; ++i) {
-        size_t idx = indices[i];
-        for (size_t j = 0; j < dim; ++j)
-            out[i * dim + j] = m_weight[idx * dim + j];
-    }
-    return out;
+    Tensor one_hot({n, vocab});
+    one_hot.fill(0.0f);
+    for (size_t i = 0; i < n; ++i)
+        one_hot.at(i, indices[i]) = 1.0f;
+    return Tensor::matmul(one_hot, m_weight);
 }
 
 Tensor &Embedding::weight() { return m_weight; }

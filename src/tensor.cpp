@@ -81,7 +81,7 @@ Tensor Tensor::matmul(const Tensor &a, const Tensor &b) {
     }
     if (a.m_requires_grad || b.m_requires_grad) {
         out.m_requires_grad = true;
-        out.m_grad_fn = std::make_shared<MatMulFunction>(const_cast<Tensor*>(&a), const_cast<Tensor*>(&b));
+        out.m_grad_fn = std::make_shared<MatMulFunction>(const_cast<Tensor&>(a), const_cast<Tensor&>(b));
     }
     return out;
 }
@@ -93,7 +93,7 @@ Tensor Tensor::add(const Tensor &a, const Tensor &b) {
         out.m_data[i] = a.m_data[i] + b.m_data[i];
     if (a.m_requires_grad || b.m_requires_grad) {
         out.m_requires_grad = true;
-        out.m_grad_fn = std::make_shared<AddFunction>(const_cast<Tensor*>(&a), const_cast<Tensor*>(&b));
+        out.m_grad_fn = std::make_shared<AddFunction>(const_cast<Tensor&>(a), const_cast<Tensor&>(b));
     }
     return out;
 }
@@ -105,7 +105,7 @@ Tensor Tensor::sub(const Tensor &a, const Tensor &b) {
         out.m_data[i] = a.m_data[i] - b.m_data[i];
     if (a.m_requires_grad || b.m_requires_grad) {
         out.m_requires_grad = true;
-        out.m_grad_fn = std::make_shared<SubFunction>(const_cast<Tensor*>(&a), const_cast<Tensor*>(&b));
+        out.m_grad_fn = std::make_shared<SubFunction>(const_cast<Tensor&>(a), const_cast<Tensor&>(b));
     }
     return out;
 }
@@ -117,7 +117,7 @@ Tensor Tensor::mul(const Tensor &a, const Tensor &b) {
         out.m_data[i] = a.m_data[i] * b.m_data[i];
     if (a.m_requires_grad || b.m_requires_grad) {
         out.m_requires_grad = true;
-        out.m_grad_fn = std::make_shared<MulFunction>(const_cast<Tensor*>(&a), const_cast<Tensor*>(&b));
+        out.m_grad_fn = std::make_shared<MulFunction>(const_cast<Tensor&>(a), const_cast<Tensor&>(b));
     }
     return out;
 }
@@ -147,7 +147,7 @@ Tensor Tensor::relu() const {
     }
     if (m_requires_grad) {
         out.m_requires_grad = true;
-        out.m_grad_fn = std::make_shared<ReLUFunction>(const_cast<Tensor*>(this), mask);
+        out.m_grad_fn = std::make_shared<ReLUFunction>(const_cast<Tensor&>(*this), mask);
     }
     return out;
 }
@@ -171,7 +171,7 @@ Tensor Tensor::transpose(const Tensor &t) {
             out[j * t.m_shape[0] + i] = t[i * t.m_shape[1] + j];
     if (t.m_requires_grad) {
         out.m_requires_grad = true;
-        out.m_grad_fn = std::make_shared<TransposeFunction>(const_cast<Tensor*>(&t));
+        out.m_grad_fn = std::make_shared<TransposeFunction>(const_cast<Tensor&>(t));
     }
     return out;
 }
@@ -197,7 +197,7 @@ Tensor Tensor::softmax(const Tensor &t) {
     }
     if (t.m_requires_grad) {
         out.m_requires_grad = true;
-        out.m_grad_fn = std::make_shared<SoftmaxFunction>(const_cast<Tensor*>(&t), out);
+        out.m_grad_fn = std::make_shared<SoftmaxFunction>(const_cast<Tensor&>(t), out);
     }
     return out;
 }
