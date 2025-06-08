@@ -48,3 +48,6 @@ add_test(NAME all_tests COMMAND all_tests "~[TRAIN]")
 
 add_test(NAME training COMMAND all_tests "[TRAIN]")
 set_tests_properties(training PROPERTIES LABELS "TRAIN")
+
+add_executable(train_shakespeare examples/train_shakespeare.cpp)
+target_link_libraries(train_shakespeare PRIVATE mini_torch)
